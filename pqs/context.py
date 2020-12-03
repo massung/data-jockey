@@ -41,6 +41,9 @@ class Context:
         # add arguments column to the environment
         self.frames['ENV']['ARGV'] = pd.Series([argv or []])
 
+        # create the 'it' table
+        self.it = pd.DataFrame()
+
         # execution permissions
         self.allow_read = allow_read
         self.allow_connect = allow_connect
