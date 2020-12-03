@@ -126,13 +126,6 @@ def p_columnid(p):
     p[0] = p[1]
 
 
-def p_variable(p):
-    """
-    variable : VARIABLE
-    """
-    p[0] = Variable(p[1])
-
-
 def p_column(p):
     """
     column : columnid
@@ -167,7 +160,6 @@ def p_primary(p):
     primary : literal
             | template
             | na
-            | variable
             | column
             | paren
             | list

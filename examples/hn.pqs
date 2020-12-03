@@ -1,4 +1,4 @@
-SELECT IFNULL(ARGV[1], 'top') INTO type
+SELECT IFNULL(ARGV[1], 'top') FROM ENV INTO type
 
 # load story ids from hacker news
 READ "https://hacker-news.firebaseio.com/v0/${_0}stories.json"

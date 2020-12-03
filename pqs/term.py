@@ -47,17 +47,6 @@ class Template(Term):
 
 
 @dataclass
-class Variable(Term):
-    """
-    A variable value.
-    """
-    name: str
-
-    def evaluate(self, df):
-        return os.getenv(self.name)
-
-
-@dataclass
 class Column(Term):
     """
     A primary value, which is the name of a column.

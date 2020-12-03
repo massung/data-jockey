@@ -9,16 +9,37 @@ class Context:
     Script context.
     """
 
-    def __init__(self, parent_context=None, argv=None, allow_read=True, allow_connect=True, allow_run=True):
+    def __init__(self, parent_context=None, env=None, argv=None, allow_read=True, allow_connect=True, allow_run=True):
         """
-        Initialize the context. If present, data should be a list of
-        (value, column_name) tuples.
+        Initialize the context.
+
+        If the `parent_context` is provided, all the frames and sources of it
+        will be inherited by this context.
+
+        The `env` argument initializes the ENV frame with a column per key and
+        the value being the value in the dictionary.
+
+        The `argv` list - if provided - will add an ARGV column to the ENV
+        frame with an array of arguments.
+
+        The `allow_*` parameters are for security, allowing you to disable
+        script access to the READ, CONNECT, and RUN commands.
         """
         self.frames = (parent_context and parent_context.frames) or {}
         self.sources = (parent_context and parent_context.sources) or {}
 
-        # create the ARGV list for the 'it' frame
-        self.it = pd.DataFrame([(argv or [],)], columns=['ARGV'])
+        # create the environment dictionary
+        self.env = {}
+        if parent_context:
+            self.env.update(parent_context.env)
+        if env:
+            self.env.update(env)
+
+        # build the environment frame
+        self.frames['ENV'] = pd.DataFrame([self.env.values()], columns=self.env.keys())
+
+        # add arguments column to the environment
+        self.frames['ENV']['ARGV'] = pd.Series([argv or []])
 
         # execution permissions
         self.allow_read = allow_read

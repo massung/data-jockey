@@ -9,7 +9,7 @@
 
 # Dependencies
 
-* [Python 3.6+][python]
+* [Python 3.9+][python]
 * [setuptools][setuptools]
 * [pandas][pandas]
 * [python-dotenv][dotenv]
@@ -29,3 +29,4 @@
 [sqlalchemy]: http://www.sqlalchemy.org/
 [requests]: https://requests.readthedocs.io/en/master/
 [ply]: https://ply.readthedocs.io/en/latest/index.html
+[pandas]: https://pandas.pydata.org/

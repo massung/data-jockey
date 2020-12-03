@@ -43,17 +43,11 @@ class Script:
         """
         return asyncio.run(self.run_async(), **run_kwargs)
 
-    async def run_async(self, env=None):
+    async def run_async(self):
         """
         Executes the loaded script using the current context asynchronously.
         """
         old_cwd = os.getcwd()
-        old_env = dict(os.environ)
-
-        # temporarily update the environment
-        if env:
-            for k, v in env.items():
-                os.environ[k] = v
 
         try:
             result = None
@@ -84,4 +78,3 @@ class Script:
             return result
         finally:
             os.chdir(old_cwd)
-            os.environ = old_env

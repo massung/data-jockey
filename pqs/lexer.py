@@ -18,7 +18,6 @@ _tokens = (
     'STRING',
     'TEMPLATE',
     'RAW',
-    'VARIABLE',
     'CONSTANT',
     'INTEGER',
     'FLOAT',
@@ -184,12 +183,6 @@ def t_QUOTED_ID(t):
 def t_COLUMN_INDEX(t):
     r":\d+"
     t.value = int(t.value[1:])
-    return t
-
-
-def t_VARIABLE(t):
-    r"(?a:\$[_a-zA-Z][_a-zA-Z0-9]*)"
-    t.value = t.value.lstrip('$')
     return t
 
 
