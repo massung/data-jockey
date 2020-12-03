@@ -2,6 +2,8 @@
 
 PQS is a simple, non-branching, immutable, scripting language that reads tabular data and generates new tabular data from it using simple, SQL-like commands.
 
+It's designed to be easily accessible to non-programmers (it was specifically created targeting geneticists). And it takes heavy inspiration from the old [HyperTalk][hypertalk] programming language.
+
 __Non-branching__
 
 There are no `IF` statements or loops in PQS. However, all statements are vectorized. This means that if you supply a column of values in to a statement it will execute the statement once per value in the column. For example:
@@ -22,7 +24,7 @@ Here's an example script the reads the top 20 stories from Hacker News and outpu
 READ "https://hacker-news.firebaseio.com/v0/topstories.json"
 TAKE 20
 
-# download each story
+# download the stories in parallel into a new table
 READ "https://hacker-news.firebaseio.com/v0/item/$_0.json"
 
 # keep stories with links by and sort by score
@@ -182,7 +184,7 @@ While PQS works great as a REPL and a simple scripting language for processing t
 
 # Dependencies
 
-* [Python 3.9+][python]
+* [Python 3.7+][python]
 * [setuptools][setuptools]
 * [pandas][pandas]
 * [python-dotenv][dotenv]
@@ -194,6 +196,7 @@ While PQS works great as a REPL and a simple scripting language for processing t
 
 # fin.
 
+[hypertalk]: https://en.wikipedia.org/wiki/HyperTalk
 [python]: https://www.python.org/
 [setuptools]: https://setuptools.readthedocs.io/en/latest/
 [dotenv]: https://saurabh-kumar.com/python-dotenv/
