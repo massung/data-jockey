@@ -1,0 +1,20 @@
+SELECT IFNULL(ARGV[1], 'top') INTO type
+
+# load story ids from hacker news
+READ "https://hacker-news.firebaseio.com/v0/${_0}stories.json"
+
+# take the top ids
+TAKE 20
+
+# fetch each of the stories into a single table
+READ "https://hacker-news.firebaseio.com/v0/item/$_0.json"
+
+# sort stories w/ links by score
+FILTER type='story' and url is not null
+SORT BY score DESC
+
+# return stories
+SELECT score, title, url
+
+# output
+WRITE AS CSV FIELD DELIMITER TAB

@@ -1,0 +1,9 @@
+
+# build a list of the numbers 0-9
+SELECT iota(10)
+
+# put each number in its own row
+EXPLODE _0
+
+# build each row into a list of N numbers
+SELECT _0, iota(_0)

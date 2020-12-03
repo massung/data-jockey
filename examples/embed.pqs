@@ -1,0 +1,22 @@
+# build an embedded table to act on
+CREATE people AS CSV WITH HEADER << END
+name,age,gender
+jeff,44,M
+isabel,11,F
+bob,23,M
+END
+
+# some arbitrary numeric operation on embedded table
+FILTER age > 20 INTO adults
+
+# create another table using another dialect
+CREATE salaries AS JSON LINES << EOT
+{"name": "jeff", "salary": 20}
+{"name": "isabel", "salary": 10}
+EOT
+
+# join them together
+LEFT JOIN adults WITH salaries ON name
+
+# just output it
+WRITE AS JSON
