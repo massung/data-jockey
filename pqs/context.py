@@ -1,7 +1,6 @@
 import pandas as pd
 
-
-from .utils import create_frame
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Context:
@@ -16,8 +15,7 @@ class Context:
         If the `parent_context` is provided, all the frames and sources of it
         will be inherited by this context.
 
-        The `env` argument initializes the ENV frame with a column per key and
-        the value being the value in the dictionary.
+        The `env` argument initializes the ENV frame with a column per key.
 
         The `argv` list - if provided - will add an ARGV column to the ENV
         frame with an array of arguments.
@@ -49,6 +47,9 @@ class Context:
         self.allow_connect = allow_connect
         self.allow_run = allow_run
 
+        # create a thread pool for vectorized commands
+        self.thread_pool = parent_context.thread_pool if parent_context else ThreadPoolExecutor(max_workers=20)
+
     @property
     def it(self):
         """
@@ -62,13 +63,6 @@ class Context:
         Sets the value of it in the context.
         """
         self.frames['it'] = df
-
-    def clear(self):
-        """
-        Reset the context and connected sources.
-        """
-        self.frames = dict(it=pd.DataFrame())
-        self.sources = dict()
 
     def register(self, name, source):
         """

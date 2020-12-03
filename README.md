@@ -10,9 +10,48 @@ __Immutable__
 
 No table data can be overwritten or changed. Every operation generates a new, immutable table as a result.
 
-## Examples
+## Basics of PQS
 
+At its core a PQS script simply loads tabular data, extracts bits, performs various options or transforms on it, and then either return or write the results to another location.
 
+### An Example
+
+Here's an example script the reads the top 20 stories from Hacker News and outputs them to the terminal in CSV format:
+
+```
+READ "https://hacker-news.firebaseio.com/v0/topstories.json"
+TAKE 20
+
+# download each story
+READ "https://hacker-news.firebaseio.com/v0/item/$_0.json"
+
+# keep stories with links by and sort by score
+FILTER type='story' and url is not null
+SORT BY score DESC
+
+# output the score and title
+SELECT score, title, url
+
+# dump to the terminal
+WRITE AS CSV WITH HEADER
+```
+
+### Results, it, and named tables
+
+Interesting points of interest from the above script:
+
+* Every command implicitly stores its result in `it`.
+* Every command implicitly uses `it` for its input if not provided a table.
+* Every command is vectorized; if a parameter is a series, the output will also be.
+
+The output of every command can be redirected to any named variable using `INTO`. For example:
+
+```
+SORT employees BY salary DESC INTO `top-salaries`
+
+TAKE 10 FROM `top-salaries` INTO highest_salaried_employees
+TAKE LAST 10 FROM `top-salaries` INTO lowest_salaried_employees
+```
 
 ## Setup
 

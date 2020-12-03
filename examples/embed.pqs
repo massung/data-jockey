@@ -1,9 +1,11 @@
 # build an embedded table to act on
 CREATE people AS CSV WITH HEADER << END
 name,age,gender
-jeff,44,M
-isabel,11,F
-bob,23,M
+Jeff,44,M
+Isabel,11,F
+Diamen,43,M
+Jennie,38,F
+Norah,12,F
 END
 
 # some arbitrary numeric operation on embedded table
@@ -11,8 +13,9 @@ FILTER age > 20 INTO adults
 
 # create another table using another dialect
 CREATE salaries AS JSON LINES << EOT
-{"name": "jeff", "salary": 20}
-{"name": "isabel", "salary": 10}
+{"name": "Jeff", "salary": 20}
+{"name": "Isabel", "salary": 10}
+{"name": "Jennie", "salary": 25}
 EOT
 
 # join them together

@@ -60,8 +60,8 @@ class Dialect:
                     escapechar=csv_dialect.escapechar,
                 )
 
-        # default dialect
-        return CSV(sep='\t')
+        # unablet to infer
+        return None
 
 
 class CSV(Dialect):

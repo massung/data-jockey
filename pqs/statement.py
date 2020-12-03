@@ -7,12 +7,13 @@ import smart_open
 import sys
 import tempfile
 
+from concurrent.futures import wait
 from dataclasses import dataclass
 from typing import Union
 
 from .context import Context
-from .dialect import Dialect
-from .functions import series_function
+from .dialect import CSV, Dialect
+from .functions import series_function, parseries_function
 from .source import SQLSource
 from .term import Term
 from .utils import create_frame
@@ -361,7 +362,7 @@ class Query(Statement):
         query = self.term.evaluate(df)
 
         # get the resulting data/series
-        data = await asyncio.to_thread(self.runquery, query, source, self.table)
+        data = await self.runquery(context.thread_pool, query, source, self.table)
 
         # a single dataframe should be returned as-is
         if isinstance(data, pd.DataFrame):
@@ -371,7 +372,7 @@ class Query(Statement):
         return pd.concat(data.array, ignore_index=True)
 
     @staticmethod
-    @series_function()
+    @parseries_function()
     def runquery(q, source, table):
         """
         Execute the query.
@@ -445,7 +446,7 @@ class Read(Statement):
         source = self.file_or_url.evaluate(df)
 
         # get the resulting data/series
-        data = await asyncio.to_thread(self.read, source, self.dialect)
+        data = await self.read(context.thread_pool, source, self.dialect)
 
         # a single dataframe should be returned as-is
         if isinstance(data, pd.DataFrame):
@@ -455,10 +456,13 @@ class Read(Statement):
         return pd.concat(data.array, ignore_index=True)
 
     @staticmethod
-    @series_function()
+    @parseries_function()
     def read(source, dialect):
-        if dialect is None:
-            dialect = Dialect.infer(source)
+        dialect = dialect or Dialect.infer(source)
+
+        # fail if could not infer dialect
+        if not dialect:
+            raise RuntimeError('Cannot infer file format; specify with AS')
 
         # open the source location
         with smart_open.open(source, encoding='utf-8') as fp:
@@ -720,8 +724,7 @@ class Write(Statement):
             file_or_url = None
 
         # infer formatter from file extension
-        if dialect is None:
-            dialect = Dialect.infer(file_or_url)
+        dialect = dialect or Dialect.infer(file_or_url) or CSV(sep='\t')
 
         # write the table to the location
         if file_or_url is None:
