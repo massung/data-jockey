@@ -39,12 +39,12 @@ def parseries_function():
     def decorator(f):
         async def handler(*xs):
             is_series = any(isinstance(x, pd.Series) for x in xs)
+            loop = asyncio.get_event_loop()
 
             if is_series:
                 args = zip(*(x.array if isinstance(x, pd.Series) else itertools.repeat(x) for x in xs))
 
                 # submit the jobs to the executor
-                loop = asyncio.get_event_loop()
                 jobs = [loop.run_in_executor(xs[0], f, *xs[1:]) for xs in args]
 
                 # wait for all the jobs to complete
@@ -53,8 +53,8 @@ def parseries_function():
                 # union the results together in a series
                 return pd.Series(rs for rs in data)
 
-            # just return the scalar of the function
-            return f(*xs)
+            # just run a single job
+            return await loop.run_in_executor(xs[0], f, *xs[1:])
 
         return handler
     return decorator

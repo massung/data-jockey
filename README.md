@@ -4,11 +4,11 @@ PQS is a simple, non-branching, immutable, scripting language that reads tabular
 
 It's designed to be easily accessible to non-programmers (it was specifically created targeting geneticists). And it takes heavy inspiration from the old [HyperTalk][hypertalk] programming language.
 
-__Non-branching__
+### Non-branching
 
 There are no `IF` statements or loops in PQS. However, all statements are vectorized. This means that if you supply a column of values in to a statement it will execute the statement once per value in the column. For example:
 
-__Immutable__
+### Immutable
 
 No table data can be overwritten or changed. Every operation generates a new, immutable table as a result.
 

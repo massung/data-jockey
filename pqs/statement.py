@@ -533,7 +533,7 @@ class Run(Statement):
 
         # explode the arguments and run all rows
         args = [arg.evaluate(df) for arg in self.args]
-        data = await self.run(context, *args)
+        data = [await result for result in self.run(context, *args)]
 
         # empty frame if no result
         if data is None:

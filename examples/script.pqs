@@ -4,7 +4,8 @@ EXPLODE _0
 # load the top Hacker News stories for each group
 RUN 'hn.pqs', _0
 
-# sort them all by score
+# remove duplicates, sort by score
+DISTINCT BY id
 SORT BY score DESC
 
 # output them as CSV

@@ -7,6 +7,10 @@ from .lexer import lexer
 from .parser import parser
 
 
+class ScriptError(Exception):
+    pass
+
+
 class Script:
     """
     Script can read/load scripts and execute them.
@@ -71,9 +75,9 @@ class Script:
                         if into is not None:
                             self.context.frames[into] = self.context.it
                 except KeyError as ex:
-                    raise RuntimeError(f'{self.source} ({line}): Unknown table/column {ex}')
+                    raise ScriptError(f'{self.source} ({line}): Unknown table/column {ex}')
                 except Exception as ex:
-                    raise RuntimeError(f'{self.source} ({line}): {ex}') if self.source else ex
+                    raise ScriptError(f'{self.source} ({line}): {ex}') if self.source else ex
 
             return result
         finally:
