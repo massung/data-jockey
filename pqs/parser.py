@@ -421,7 +421,7 @@ def p_block(p):
 
 def p_block_end(p):
     """
-    block : END
+    block :
     """
     p[0] = ''
 
@@ -508,6 +508,7 @@ def p_sourcetype(p):
 def p_keyword(p):
     """
     keyword : CONNECT
+            | CROSS
             | CREATE
             | DISTINCT
             | DROP
@@ -539,6 +540,20 @@ def p_connect(p):
     connect : CONNECT ident TO string AS sourcetype
     """
     p[0] = Connect(alias=p[2], url=p[4], type=p[6])
+
+
+def p_cross(p):
+    """
+    cross : CROSS ident WITH ident
+    """
+    p[0] = Cross(table=p[2], other=p[4])
+
+
+def p_cross_it(p):
+    """
+    cross : CROSS WITH ident
+    """
+    p[0] = Cross(table='it', other=p[3])
 
 
 def p_distinct(p):
@@ -884,6 +899,7 @@ def p_write_it(p):
 def p_statement(p):
     """
     statement : connect
+              | cross
               | distinct
               | drop
               | explode
@@ -916,19 +932,19 @@ def p_command(p):
     p[0] = (p.lineno(1), p[1], None)
 
 
+def p_command_into(p):
+    """
+    command : statement INTO ident
+    """
+    p[0] = (p.lineno(1), p[1], p[3])
+
+
 def p_command_create(p):
     """
     command : CREATE ident as block
             | CREATE ident as string
     """
     p[0] = (p.lineno(1), Create(dialect=p[3], block=p[4]), p[2])
-
-
-def p_command_into(p):
-    """
-    command : statement INTO ident
-    """
-    p[0] = (p.lineno(1), p[1], p[3])
 
 
 def p_program(p):

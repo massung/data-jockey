@@ -1,0 +1,18 @@
+
+CREATE people AS CSV WITH HEADER << END
+name
+jeff
+jennie
+isabel
+dave
+END
+
+CREATE ages AS CSV WITH HEADER << EOT
+age
+44
+27
+11
+23
+EOT
+
+CROSS people WITH ages

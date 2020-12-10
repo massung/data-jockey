@@ -41,11 +41,11 @@ class Script:
         except SyntaxError as ex:
             raise SyntaxError(f'{source}: {ex}') if source else ex
 
-    def run(self, **run_kwargs):
+    def run(self, *args, **run_kwargs):
         """
         Executes the loaded script using the current context.
         """
-        return asyncio.run(self.run_async(), **run_kwargs)
+        return asyncio.run(self.run_async(), *args, **run_kwargs)
 
     async def run_async(self):
         """

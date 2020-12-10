@@ -2,11 +2,12 @@ SELECT ['top', 'new', 'best']
 EXPLODE _0
 
 # load the top Hacker News stories for each group
+PRINT 'Downloading $_0 stories...'
 RUN 'hn.pqs', _0
 
 # remove duplicates, sort by score
-DISTINCT BY id
+DISTINCT BY url
 SORT BY score DESC
 
 # output them as CSV
-WRITE AS CSV
+WRITE AS CSV FIELD DELIMITER TAB

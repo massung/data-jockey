@@ -65,6 +65,38 @@ class Connect(Statement):
 
 
 @dataclass
+class Cross(Statement):
+    """
+    Merges two tables with a cross product.
+
+    This is different from a JOIN in that there is no ON columns
+    specified, it is a true cross product.
+
+    Syntax:
+      CROSS [table] WITH table
+
+    Examples:
+      CROSS states WITH people
+    """
+    table: str
+    other: str
+
+    async def execute(self, context):
+        l = context.frames[self.table]
+        r = context.frames[self.other]
+
+        # create a common key
+        lk = l.assign(**{'$key$':1})
+        rk = r.assign(**{'$key$':1})
+
+        # how to differentiate common column names
+        suffixes = (f'_{self.table}', f'_{self.other}')
+
+        # merge and remove common key
+        return lk.merge(rk, on='$key$', suffixes=suffixes).drop('$key$', 1)
+
+
+@dataclass
 class Create(Statement):
     """
     Declares a literal table.
@@ -245,8 +277,11 @@ class Join(Statement):
         left = context.frames[self.table]
         right = context.frames[self.other]
 
+        # how to differentiate common column names
+        suffixes = (f'_{self.table}', f'_{self.other}')
+
         # merge into a new table
-        return left.merge(right, on=self.on, how=self.how)
+        return left.merge(right, on=self.on, how=self.how, suffixes=suffixes)
 
 
 @dataclass
@@ -533,18 +568,16 @@ class Run(Statement):
 
         # explode the arguments and run all rows
         args = [arg.evaluate(df) for arg in self.args]
-        data = [await result for result in self.run(context, *args)]
+        r = self.run(context, *args)
 
-        # empty frame if no result
-        if data is None:
-            return pd.DataFrame()
+        # wrap a single coroutine into a task list
+        tasks = [r] if asyncio.iscoroutine(r) else r.array
 
-        # a single dataframe should be returned as-is
-        if isinstance(data, pd.DataFrame):
-            return data
+        # wait for all the tasks to complete
+        finished, _ = await asyncio.wait(tasks)
 
-        # remove NA results from a series of results
-        data = data.dropna()
+        # resolve each coroutine
+        data = pd.Series(task.result() for task in finished).dropna()
         if data.empty:
             return pd.DataFrame()
 

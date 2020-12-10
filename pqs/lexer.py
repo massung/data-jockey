@@ -45,6 +45,7 @@ reserved = (
     'BY',
     'CONNECT',
     'CREATE',
+    'CROSS',
     'CSV',
     'DELIMITER',
     'DESC',
@@ -223,12 +224,16 @@ def t_BLOCK(t):
 
 def t_block_RAW(t):
     r'.*[\r\n]+'
+    global block_end
+
+    # count lines
     t.lexer.lineno += t.value.count('\n')
 
     # check for end of the block
     if t.value.strip() == block_end:
         t.lexer.pop_state()
         t.type = 'END'
+        block_end = None
 
     return t
 

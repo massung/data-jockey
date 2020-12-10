@@ -23,8 +23,8 @@ class Context:
         The `allow_*` parameters are for security, allowing you to disable
         script access to the READ, CONNECT, and RUN commands.
         """
-        self.frames = (parent_context and parent_context.frames) or {}
-        self.sources = (parent_context and parent_context.sources) or {}
+        self.frames = dict((parent_context and parent_context.frames) or {})
+        self.sources = dict((parent_context and parent_context.sources) or {})
 
         # create the environment dictionary
         self.env = {}
@@ -33,19 +33,19 @@ class Context:
         if env:
             self.env.update(env)
 
-        # build the environment frame
+        # build a new environment frame
         self.frames['ENV'] = pd.DataFrame([self.env.values()], columns=self.env.keys())
 
         # add arguments column to the environment
-        self.frames['ENV']['ARGV'] = pd.Series([argv or []])
+        self.frames['ENV']['ARGV'] = pd.Series([list(argv or [])])
 
         # create the 'it' table
         self.it = pd.DataFrame()
 
         # execution permissions
-        self.allow_read = allow_read
-        self.allow_connect = allow_connect
-        self.allow_run = allow_run
+        self.allow_read = allow_read and (parent_context.allow_read if parent_context else True)
+        self.allow_connect = allow_connect and (parent_context.allow_connect if parent_context else True)
+        self.allow_run = allow_run and (parent_context.allow_run if parent_context else True)
 
         # create a thread pool for vectorized commands
         self.thread_pool = parent_context.thread_pool if parent_context else ThreadPoolExecutor(max_workers=20)
