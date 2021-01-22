@@ -1,5 +1,7 @@
 import asyncio
+import base64
 import io
+import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import re
@@ -7,7 +9,6 @@ import smart_open
 import sys
 import tempfile
 
-from concurrent.futures import wait
 from dataclasses import dataclass
 from typing import Union
 
@@ -90,7 +91,7 @@ class Cross(Statement):
         rk = r.assign(**{'$key$':1})
 
         # how to differentiate common column names
-        suffixes = (f'_{self.table}', f'_{self.other}')
+        suffixes = (None, f'_{self.other}')
 
         # merge and remove common key
         return lk.merge(rk, on='$key$', suffixes=suffixes).drop('$key$', 1)
@@ -278,7 +279,7 @@ class Join(Statement):
         right = context.frames[self.other]
 
         # how to differentiate common column names
-        suffixes = (f'_{self.table}', f'_{self.other}')
+        suffixes = (None, f'_{self.other}')
 
         # merge into a new table
         return left.merge(right, on=self.on, how=self.how, suffixes=suffixes)
@@ -319,6 +320,75 @@ class Open(Statement):
 
         # launch editor
         os.startfile(file.name)
+
+
+@dataclass
+class Plot(Statement):
+    """
+    Generates a plot of a table.
+
+    If no output file is provided, then a new dataframe is returned
+    with two colums: the MIME type of the plot and the base-64 encoded
+    data of the plot.
+
+    The options - if provided - should be another table that is a
+    single row, where each column s a keyword argument to the Plotly
+    Express plot function. For each row of options, another plot will
+    be added to the figure.
+
+    Syntax:
+      PLOT [table] [AS type] [TO file] [WITH options]
+
+    Examples:
+      CREATE plot_options AS JSON LINES << END
+      {"x":"time","y":"cost"}
+      END
+
+      PLOT costs WITH plot_options
+    """
+    table: str
+    file_or_url: str = None
+    options: str = None
+
+    async def execute(self, context):
+        assert context.allow_write or not self.file_or_url, 'WRITE permission disabled'
+
+        # table to plot
+        df = context.frames[self.table]
+        row_opts = context.frames[self.options].to_dict('records') if self.options else [{}]
+
+        # create the figure; add every subplot
+        plt.figure()
+        for row, opts in enumerate(row_opts):
+            plot_type = opts.get('type', 'plot')
+            plot = getattr(plt, plot_type, None)
+
+            # make sure the plot type is valid
+            assert plot and callable(plot), f'No such plot type as "{plot_type}"'
+
+            # x/y coordinates
+            x = df[opts.get('x', 'x')]
+            y = df[opts.get('y', 'y')]
+
+            # plot
+            plot(x, y, **{k:v for k, v in opts.items() if k not in ['x', 'y', 'type']})
+
+        # return a table if no destination specified
+        if not self.file_or_url:
+            buf = io.BytesIO()
+
+            # write to bytes
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+
+            # encode the image
+            data = base64.encodebytes(buf.read()).decode(encoding='utf-8')
+
+            # return the image in a frame
+            return pd.DataFrame([{'mime': 'image/png', 'data': data}])
+
+        # output the image
+        plt.savefig(self.file_or_url)
 
 
 @dataclass
@@ -519,7 +589,7 @@ class Rename(Statement):
       RENANE column TO column [FROM table]
 
     Examples:
-      RENAME :0 TO name
+      RENAME _0 TO name
     """
     table: str
     column: str
@@ -732,7 +802,7 @@ class Write(Statement):
     written to standard out.
 
     Syntax:
-      WRITE [table] [TO term] [AS format]
+      WRITE [table] [TO file] [AS format]
 
     See:
       READ for available URI locations and file formats.
@@ -743,25 +813,22 @@ class Write(Statement):
       WRITE people TO 'workers.csv' AS CSV WITH HEADER
     """
     table: str
-    file_or_url: Term = None
+    file_or_url: str = None
     dialect: Dialect = None
 
     async def execute(self, context):
+        assert context.allow_write, 'WRITE permission disabled'
+
+        # get table and selected dialect
         df = context.frames[self.table]
         dialect = self.dialect
 
-        if self.file_or_url:
-            value = self.file_or_url.evaluate(context.it)
-            file_or_url = value[0] if isinstance(value, pd.Series) else value
-        else:
-            file_or_url = None
-
         # infer formatter from file extension
-        dialect = dialect or Dialect.infer(file_or_url) or CSV(sep='\t')
+        dialect = dialect or Dialect.infer(self.file_or_url) or CSV(sep='\t')
 
         # write the table to the location
-        if file_or_url is None:
+        if self.file_or_url is None:
             dialect.write(df, file=sys.stdout)
         else:
-            with smart_open.open(file_or_url, encoding='utf-8', mode='w', newline='') as fp:
+            with smart_open.open(self.file_or_url, encoding='utf-8', mode='w', newline='') as fp:
                 dialect.write(df, file=fp)

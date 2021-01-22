@@ -80,6 +80,7 @@ reserved = (
     'OPEN',
     'OR',
     'OUTER',
+    'PLOT',
     'PRINT',
     'PUT',
     'QUERY',

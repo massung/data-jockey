@@ -11,6 +11,7 @@ setup(
     ],
     install_requires=[
         'click>=7.0',
+        'matplotlib>=3.3',
         'orjson>=3.4',
         'pandas>=1.1',
         'ply>=3.11',

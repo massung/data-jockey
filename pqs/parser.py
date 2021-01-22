@@ -490,6 +490,20 @@ def p_html(p):
     p[0] = HTML()
 
 
+def p_to(p):
+    """
+    to : TO string
+    """
+    p[0] = p[2]
+
+
+def p_with(p):
+    """
+    with : WITH ident
+    """
+    p[0] = p[2]
+
+
 def p_keep(p):
     """
     keep : KEEP FIRST
@@ -517,6 +531,7 @@ def p_keyword(p):
             | HELP
             | JOIN
             | OPEN
+            | PLOT
             | PRINT
             | PUT
             | QUERY
@@ -653,6 +668,26 @@ def p_open_it(p):
     open : OPEN as
     """
     p[0] = Open(table='it', dialect=p[2])
+
+
+def p_plot(p):
+    """
+    plot : PLOT ident to with
+         | PLOT ident to
+         | PLOT ident with
+         | PLOT ident
+    """
+    p[0] = Plot(table=p[2], file_or_url=clause(p, 'to'), options=clause(p, 'with'))
+
+
+def p_plot_it(p):
+    """
+    plot : PLOT to with
+         | PLOT to
+         | PLOT with
+         | PLOT
+    """
+    p[0] = Plot(table='it', file_or_url=clause(p, 'to'), options=clause(p, 'with'))
 
 
 def p_print(p):
@@ -847,53 +882,24 @@ def p_union_it(p):
     p[0] = Union(tables=['it', *p[4]])
 
 
-def p_write_as(p):
+def p_write(p):
     """
-    write : WRITE ident as
+    write : WRITE ident to as
+          | WRITE ident to
+          | WRITE ident as
+          | WRITE ident
     """
-    p[0] = Write(table=p[2], dialect=p[3])
-
-
-def p_write_to(p):
-    """
-    write : WRITE ident TO string
-    """
-    p[0] = Write(table=p[2], file_or_url=p[4])
-
-
-def p_write_to_as(p):
-    """
-    write : WRITE ident TO string as
-    """
-    p[0] = Write(table=p[2], file_or_url=p[4], dialect=p[5])
-
-
-def p_write_it_to(p):
-    """
-    write : WRITE TO string
-    """
-    p[0] = Write(table='it', file_or_url=p[3])
-
-
-def p_write_it_as(p):
-    """
-    write : WRITE as
-    """
-    p[0] = Write(table='it', dialect=p[2])
-
-
-def p_write_it_to_as(p):
-    """
-    write : WRITE TO string as
-    """
-    p[0] = Write(table='it', file_or_url=p[3], dialect=p[4])
+    p[0] = Write(table=p[2], file_or_url=clause(p, 'to'), dialect=clause(p, 'as'))
 
 
 def p_write_it(p):
     """
-    write : WRITE
+    write : WRITE to as
+          | WRITE to
+          | WRITE as
+          | WRITE
     """
-    p[0] = Write(table='it')
+    p[0] = Write(table='it', file_or_url=clause(p, 'to'), dialect=clause(p, 'as'))
 
 
 def p_statement(p):
@@ -907,6 +913,7 @@ def p_statement(p):
               | help
               | join
               | open
+              | plot
               | print
               | put
               | query

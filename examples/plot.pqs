@@ -1,0 +1,19 @@
+
+# table to plot
+CREATE data AS CSV WITH HEADER << END
+name,age
+isabel,11
+jeff,44
+jennie,40
+sage,14
+ari,16
+END
+
+# define arguments for how this data will be rendered
+CREATE opts AS CSV WITH HEADER << END
+type,x,y
+bar,name,age
+END
+
+# create the plot
+PLOT data TO 'c:/users/jeff/desktop/test.png' WITH opts

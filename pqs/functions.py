@@ -113,7 +113,7 @@ def iota(n):
 
 
 @series_function()
-def if_(c, t, e):
+def if_(c, t, e=None):
     """
     Return t or e based on condition.
     """

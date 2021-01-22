@@ -8,7 +8,7 @@ class Context:
     Script context.
     """
 
-    def __init__(self, parent_context=None, env=None, argv=None, allow_read=True, allow_connect=True, allow_run=True):
+    def __init__(self, parent_context=None, env=None, argv=None, allow_read=True, allow_connect=True, allow_run=True, allow_write=True):
         """
         Initialize the context.
 
@@ -46,6 +46,7 @@ class Context:
         self.allow_read = allow_read and (parent_context.allow_read if parent_context else True)
         self.allow_connect = allow_connect and (parent_context.allow_connect if parent_context else True)
         self.allow_run = allow_run and (parent_context.allow_run if parent_context else True)
+        self.allow_write = allow_write and (parent_context.allow_write if parent_context else True)
 
         # create a thread pool for vectorized commands
         self.thread_pool = parent_context.thread_pool if parent_context else ThreadPoolExecutor(max_workers=20)
