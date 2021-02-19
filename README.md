@@ -1,20 +1,24 @@
-# Python/Pandas Query Scripting
+# Flummox
 
-PQS is a simple, non-branching, immutable, scripting language that reads tabular data and generates new tabular data from it using simple, SQL-like commands.
+Flummox is a simple, non-branching, immutable, scripting language that reads tabular data and generates new tabular data from it using simple, SQL-like commands.
 
 It's designed to be easily accessible to non-programmers (it was specifically created targeting geneticists). And it takes heavy inspiration from the old [HyperTalk][hypertalk] programming language.
 
+## Why?
+
+I found myself constantly referencing Pandas documentation to do even "simple" things. And while Pandas is incredibly powerful, I find that I - and most everyone I know - only need to make use of a fraction of the features it provides. This means having to try and remember all the parameter names and syntax for the common case (e.g. `axis=1`). I wanted to be able to write data query scripts in a very straight-forward manner.
+
 ### Non-branching
 
-There are no `IF` statements or loops in PQS. However, all statements are vectorized. This means that if you supply a column of values in to a statement it will execute the statement once per value in the column. For example:
+There are no `IF` statements or loops in Flummox. However, all statements are vectorized. This means that if you supply a column of values in to a statement it will execute the statement once per value in the column. For example:
 
 ### Immutable
 
 No table data can be overwritten or changed. Every operation generates a new, immutable table as a result.
 
-## Basics of PQS
+## Basics of Flummox
 
-At its core a PQS script simply loads tabular data, extracts bits, performs various options or transforms on it, and then either return or write the results to another location.
+At its core a Flummox simply loads tabular data, extracts bits, performs various options or transforms on it, and then either return or write the results to another location.
 
 ### An Example
 
@@ -31,7 +35,7 @@ READ "https://hacker-news.firebaseio.com/v0/item/$_0.json"
 FILTER type='story' and url is not null
 SORT BY score DESC
 
-# output the score and title
+# filter only a few columns
 SELECT score, title, url
 
 # dump to the terminal
@@ -60,24 +64,24 @@ TAKE LAST 10 FROM `top-salaries` INTO lowest_salaried_employees
 It's not up on PyPI (yet), but you can still install it using pip:
 
 ```bash
-$ pip install git+git://github.com/massung/python-pqs.git@master#egg=pqs
+$ pip install git+git://github.com/massung/flummox.git@master#egg=flummox
 ```
 
 Or, if you can't get that to work, simply clone and install with setup.py:
 
 ```bash
-$ git clone https://github.com/massung/python-pqs.git
-$ cd python-pqs
+$ git clone https://github.com/massung/flummox.git
+$ cd flummox
 $ python ./setup.py install
 ```
 
 ## Quickstart
 
-Once installed, you should be able to run the PQS REPL:
+Once installed, you should be able to run the Flummox REPL:
 
 ```bash
-$ pqs
-Python/Pandas Query Script 0.1
+$ flummox
+Flummox 0.1
 >> select 1+1
    _0
 0   2
@@ -122,15 +126,15 @@ Examples:
   TAKE LAST 5
 ```
 
-In addition to the REPL, you can use PQS to run a script and even send arguments to it:
+In addition to the REPL, you can use Flummox to run a script and even send arguments to it:
 
 ```bash
-$ pqs my_script.pqs arg1 arg2 arg3
+$ flummox my_script.qs arg1 arg2 arg3
 ```
 
 ## Loading Data
 
-There are multiple methods of loading/reading data in PQS:
+There are multiple methods of loading/reading data in Flummox:
 
 * Declare literal data with the CREATE command;
 * Load data with the READ command;
@@ -165,9 +169,9 @@ If no AS clause is provided, then the type of data is inferred from the file ext
 
 ### Fetch From a Connected Source
 
-PQS has an abstract type called `DataSource` that can be subclassed and implemented. This can be used to CONNECT to a named data source (either in script or programatically in Python) and then queried. The meaning of the query is entirely unique to the `DataSource`, but can be any term (number, string, ..).
+Flummox has an abstract type called `DataSource` that can be subclassed and implemented. This can be used to CONNECT to a named data source (either in script or programatically in Python) and then queried. The meaning of the query is entirely unique to the `DataSource`, but can be any term (number, string, ..).
 
-PQS comes with a very simple `SQLDataSource` that allows for connecting to a SQL database supported by [SQLAlchemy][sqlalchemy] and selecting from a specific table. For example:
+Flummox comes with a very simple `SQLDataSource` that allows for connecting to a SQL database supported by [SQLAlchemy][sqlalchemy] and selecting from a specific table. For example:
 
 ```
 CONNECT mydb TO "mysql://username:password@host:port/dbname" AS SQL
@@ -178,9 +182,9 @@ _Note: The default SQLDataSource makes no effort to sanitize query input or to p
 
 ## Embedding
 
-While PQS works great as a REPL and a simple scripting language for processing tabular data, it also can be embedded in your own Python projects, giving you and other users the ability to script processing of data.
+While Flummox works great as a REPL and a simple scripting language for processing tabular data, it also can be embedded in your own Python projects, giving you and other users the ability to script processing of data.
 
-
+TODO:
 
 # Dependencies
 

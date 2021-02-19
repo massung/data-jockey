@@ -1,10 +1,10 @@
 from setuptools import setup
 
 setup(
-    name='pqs',
+    name='flummox',
     version='0.1',
     packages=[
-        'pqs',
+        'flummox',
     ],
     py_modules=[
         'main',
@@ -22,16 +22,16 @@ setup(
         'sqlalchemy>=1.3',
     ],
     entry_points={
-        'console_scripts': ['pqs=pqs.main:cli'],
+        'console_scripts': ['flummox=flummox.main:cli'],
     },
     author='Jeffrey Massung',
     author_email='massung@gmail.com',
-    description='Python/Pandas Query Script',
-    keywords='pandas query language sql dataframe script language',
-    url='https://github.com/massung/pqs',
+    description='Flummox Data Query Language',
+    keywords='flummox pandas query sql dataframe script language',
+    url='https://github.com/massung/flummox',
     project_urls={
-        'Issues': 'https://github.com/massung/python-pqs/issues',
-        'Source': 'https://github.com/massung/python-pqs',
+        'Issues': 'https://github.com/massung/flummox/issues',
+        'Source': 'https://github.com/massung/flummox',
     },
     license='BSD3',
 )
