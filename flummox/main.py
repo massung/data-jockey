@@ -18,7 +18,7 @@ async def repl(env=None, show_motd=True):
     Read-eval-print loop.
     """
     if show_motd:
-        print(f'Flummox {MAJOR_VERSION}.{MINOR_VERSION}')
+        print(f'Flummox {MAJOR_VERSION}.{MINOR_VERSION} - HELP for help')
 
     # create a new scripting context
     script = Script(context=Context(env={**os.environ, **(env or {})}))
