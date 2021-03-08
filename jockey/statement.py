@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import re
 import smart_open
+import subprocess
 import sys
 import tempfile
 
@@ -53,12 +54,12 @@ class Connect(Statement):
     """
     alias: str
     url: str
-    kind: str
+    typ: str
 
     async def execute(self, context):
         assert context.allow_connect, 'CONNECT permission disabled'
 
-        if self.kind == 'SQL':
+        if self.typ == 'SQL':
             source = SQLSource(self.url)
 
             if source is not None:
@@ -452,9 +453,10 @@ class Query(Statement):
     of a SQL SELECT statement and the table name is required.
 
     Syntax:
-      QUERY term FROM source [.table]
+      QUERY (* | term) FROM source[.table]
 
     Examples:
+      QUERY * FROM work.employees
       QUERY "age > 40" FROM work.employees
     """
     term: Term
@@ -464,10 +466,10 @@ class Query(Statement):
     async def execute(self, context):
         df = context.it
         source = context.sources[self.source]
-        query = self.term.evaluate(df)
+        where = self.term and self.term.evaluate(df)
 
         # get the resulting data/series
-        data = await self.runquery(context.thread_pool, query, source, self.table)
+        data = await self.runquery(context.thread_pool, where, source, self.table)
 
         # a single dataframe should be returned as-is
         if isinstance(data, pd.DataFrame):
@@ -707,6 +709,63 @@ class Select(Statement):
 
 
 @dataclass
+class Shell(Statement):
+    """
+    Execute a shell statement and parse the output.
+    
+    If no format is specified, then a CSV format with WHITESPACE
+    is used as the field delimiter.
+
+    Syntax:
+      SH command [FROM table] [AS format]
+
+    See:
+      READ for available URI locations and file formats.
+
+    Examples:
+      SH "ls -l" INTO files
+    """
+    command: Term
+    table: str
+    dialect: Dialect = None
+
+    async def execute(self, context):
+        assert context.allow_read, 'READ permission disabled'
+
+        # fetch source file
+        df = context.frames[self.table]
+        command = self.command.evaluate(df)
+
+        # get the resulting data/series
+        data = await self.run(context.thread_pool, command, self.dialect)
+
+        # a single dataframe should be returned as-is
+        if isinstance(data, pd.DataFrame):
+            return data
+
+        # union results together
+        return pd.concat(data.array, ignore_index=True)
+
+    @staticmethod
+    @parseries_function()
+    def run(command, dialect):
+        dialect = dialect or CSV(sep='\s+', header=False)
+        
+        # execute the command
+        output = subprocess.check_output(command, shell=True)
+        buf = io.BytesIO(output)
+
+        # read the frame from the output
+        df = dialect.read(buf)
+
+        # renamed columns
+        columns = {k: f'_{k}' for k in df.columns if isinstance(k, int)}
+
+        # rename any integer columns to strings
+        return df.rename(columns=columns)
+        
+
+@dataclass
 class Sort(Statement):
     """
     Sorts a table by one or more columns.
@@ -824,7 +883,8 @@ class Write(Statement):
         dialect = self.dialect
 
         # infer formatter from file extension
-        dialect = dialect or Dialect.infer(self.file_or_url) or CSV(sep='\t')
+        if not dialect:
+            dialect = Dialect.infer(self.file_or_url, CSV(sep='\t'))
 
         # write the table to the location
         if self.file_or_url is None:

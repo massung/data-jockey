@@ -1,6 +1,6 @@
-# Flummox
+# Data Jockey
 
-Flummox is a simple, non-branching, immutable, scripting language that reads tabular data and generates new tabular data from it using simple, SQL-like commands.
+Jockey is a simple, non-branching, immutable, scripting language that reads tabular data and generates new tabular data from it using simple, SQL-like commands.
 
 It's designed to be easily accessible to non-programmers (it was specifically created targeting geneticists). And it takes heavy inspiration from the old [HyperTalk][hypertalk] programming language.
 
@@ -10,15 +10,15 @@ I found myself constantly referencing Pandas documentation to do even "simple" t
 
 ### Non-branching
 
-There are no `IF` statements or loops in Flummox. However, all statements are vectorized. This means that if you supply a column of values in to a statement it will execute the statement once per value in the column. For example:
+There are no `IF` statements or loops in Jockey. However, all statements are vectorized. This means that if you supply a column of values in to a statement it will execute the statement once per value in the column. For example:
 
 ### Immutable
 
 No table data can be overwritten or changed. Every operation generates a new, immutable table as a result.
 
-## Basics of Flummox
+## Basics of Jockey
 
-At its core a Flummox simply loads tabular data, extracts bits, performs various options or transforms on it, and then either return or write the results to another location.
+At its core a Jockey simply loads tabular data, extracts bits, performs various options or transforms on it, and then either return or write the results to another location.
 
 ### An Example
 
@@ -64,24 +64,24 @@ TAKE LAST 10 FROM `top-salaries` INTO lowest_salaried_employees
 It's not up on PyPI (yet), but you can still install it using pip:
 
 ```bash
-$ pip install git+git://github.com/massung/flummox.git@master#egg=flummox
+$ pip install git+git://github.com/massung/data-jockey.git@master#egg=data-jockey
 ```
 
 Or, if you can't get that to work, simply clone and install with setup.py:
 
 ```bash
-$ git clone https://github.com/massung/flummox.git
-$ cd flummox
+$ git clone https://github.com/massung/data-jockey.git
+$ cd data-jockey
 $ python ./setup.py install
 ```
 
 ## Quickstart
 
-Once installed, you should be able to run the Flummox REPL:
+Once installed, you should be able to run the Data Jockey REPL:
 
 ```bash
-$ flummox
-Flummox 0.1
+$ jockey
+Jockey 0.1 - HELP for help
 >> select 1+1
    _0
 0   2
@@ -126,15 +126,15 @@ Examples:
   TAKE LAST 5
 ```
 
-In addition to the REPL, you can use Flummox to run a script and even send arguments to it:
+In addition to the REPL, you can use Jockey to run a script and even send arguments to it:
 
 ```bash
-$ flummox my_script.qs arg1 arg2 arg3
+$ jockey my_script.qs arg1 arg2 arg3
 ```
 
 ## Loading Data
 
-There are multiple methods of loading/reading data in Flummox:
+There are multiple methods of loading/reading data in Jockey:
 
 * Declare literal data with the CREATE command;
 * Load data with the READ command;
@@ -169,9 +169,9 @@ If no AS clause is provided, then the type of data is inferred from the file ext
 
 ### Fetch From a Connected Source
 
-Flummox has an abstract type called `DataSource` that can be subclassed and implemented. This can be used to CONNECT to a named data source (either in script or programatically in Python) and then queried. The meaning of the query is entirely unique to the `DataSource`, but can be any term (number, string, ..).
+Jockey has an abstract type called `DataSource` that can be subclassed and implemented. This can be used to CONNECT to a named data source (either in script or programatically in Python) and then queried. The meaning of the query is entirely unique to the `DataSource`, but can be any term (number, string, ..).
 
-Flummox comes with a very simple `SQLDataSource` that allows for connecting to a SQL database supported by [SQLAlchemy][sqlalchemy] and selecting from a specific table. For example:
+Jockey comes with a very simple `SQLDataSource` that allows for connecting to a SQL database supported by [SQLAlchemy][sqlalchemy] and selecting from a specific table. For example:
 
 ```
 CONNECT mydb TO "mysql://username:password@host:port/dbname" AS SQL
@@ -182,7 +182,7 @@ _Note: The default SQLDataSource makes no effort to sanitize query input or to p
 
 ## Embedding
 
-While Flummox works great as a REPL and a simple scripting language for processing tabular data, it also can be embedded in your own Python projects, giving you and other users the ability to script processing of data.
+While Jockey works great as a REPL and a simple scripting language for processing tabular data, it also can be embedded in your own Python projects, giving you and other users the ability to script processing of data.
 
 TODO:
 

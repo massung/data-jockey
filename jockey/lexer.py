@@ -92,6 +92,7 @@ reserved = (
     'RIGHT',
     'RUN',
     'SELECT',
+    'SH',
     'SORT',
     'SQL',
     'TAB',
@@ -101,6 +102,7 @@ reserved = (
     'UNION',
     'WITH',
     'WRITE',
+    'WHITESPACE',
 )
 
 
@@ -166,6 +168,7 @@ def t_ID(t):
     # reserved keywords
     if kw in reserved:
         t.type = kw
+        t.value = kw
 
     # keyword math constants
     if kw in constants:

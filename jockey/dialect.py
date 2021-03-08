@@ -34,7 +34,7 @@ class Dialect:
         raise NotImplementedError
 
     @staticmethod
-    def infer(location):
+    def infer(location, default=None):
         """
         Return a format to use for the filename provided.
         """
@@ -60,8 +60,8 @@ class Dialect:
                     escapechar=csv_dialect.escapechar,
                 )
 
-        # unablet to infer
-        return None
+        # unable to infer
+        return default
 
 
 class CSV(Dialect):

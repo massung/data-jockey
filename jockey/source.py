@@ -35,7 +35,11 @@ class SQLSource(DataSource):
             raise RuntimeError(f'Failed to connect to {connection_string}')
 
     def query(self, q, table):
-        sql = f'SELECT * FROM {table} WHERE {q}'
+        sql = f'SELECT * FROM {table} '
+        
+        # optional condition
+        if q is not None:
+            sql += f'WHERE {q}'
 
         # run the query
         resp = self.engine.execute(sql)

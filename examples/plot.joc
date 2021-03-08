@@ -16,4 +16,4 @@ bar,name,age
 END
 
 # create the plot
-PLOT data TO 'c:/users/jeff/desktop/test.png' WITH opts
+PLOT data TO 'test.png' WITH opts

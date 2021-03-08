@@ -44,6 +44,7 @@ function_ops = {
     'iota': iota,
     'log': series_function()(math.log),
     'log10': series_function()(math.log10),
+    'split': series_function()(lambda s, sep: s.split(sep)),
     'uuid': lambda: str(uuid.uuid4()),
 }
 
@@ -90,6 +91,13 @@ def p_string_tab(p):
     string : TAB
     """
     p[0] = '\t'
+    
+    
+def p_string_whitespace(p):
+    """
+    string : WHITESPACE
+    """
+    p[0] = '\s+'
 
 
 def p_literal(p):
@@ -403,11 +411,19 @@ def p_order_dir(p):
     p[0] = (p[1], p[2].upper() == 'ASC')
 
 
-def p_as(p):
+def p_asinputformat(p):
     """
-    as : AS csv
-       | AS json
-       | AS html
+    asinputformat : AS csv
+                  | AS json
+    """
+    p[0] = p[2]
+    
+    
+def p_asoutputformat(p):
+    """
+    asoutputformat : AS csv
+                   | AS json
+                   | AS html
     """
     p[0] = p[2]
 
@@ -541,6 +557,7 @@ def p_keyword(p):
             | REVERSE
             | RUN
             | SELECT
+            | SH
             | SORT
             | TAKE
             | TRANSPOSE
@@ -554,7 +571,7 @@ def p_connect(p):
     """
     connect : CONNECT ident TO string AS sourcetype
     """
-    p[0] = Connect(alias=p[2], url=p[4], type=p[6])
+    p[0] = Connect(alias=p[2], url=p[4], typ=p[6])
 
 
 def p_cross(p):
@@ -658,14 +675,14 @@ def p_join_it(p):
 
 def p_open(p):
     """
-    open : OPEN ident as
+    open : OPEN ident asinputformat
     """
     p[0] = Open(table=p[2], dialect=p[3])
 
 
 def p_open_it(p):
     """
-    open : OPEN as
+    open : OPEN asoutputformat
     """
     p[0] = Open(table='it', dialect=p[2])
 
@@ -721,15 +738,17 @@ def p_put_it(p):
 def p_query(p):
     """
     query : QUERY term FROM ident
+          | QUERY MUL FROM ident
     """
-    p[0] = Query(term=p[2], source=p[4])
+    p[0] = Query(term=p[2] if p[2] != '*' else None, source=p[4])
 
 
 def p_query_table(p):
     """
     query : QUERY term FROM ident '.' ident
+          | QUERY MUL FROM ident '.' ident
     """
-    p[0] = Query(term=p[2], source=p[4], table=p[6])
+    p[0] = Query(term=p[2] if p[2] != '*' else None, source=p[4], table=p[6])
 
 
 def p_quit(p):
@@ -742,7 +761,7 @@ def p_quit(p):
 def p_read(p):
     """
     read : READ term FROM ident
-         | READ term FROM ident as
+         | READ term FROM ident asinputformat
     """
     p[0] = Read(file_or_url=p[2], table=p[4], dialect=clause(p, 'as'))
 
@@ -750,7 +769,7 @@ def p_read(p):
 def p_read_it(p):
     """
     read : READ term
-         | READ term as
+         | READ term asinputformat
     """
     p[0] = Read(file_or_url=p[2], table='it', dialect=clause(p, 'as'))
 
@@ -809,6 +828,22 @@ def p_select_it(p):
     select : SELECT exprlist
     """
     p[0] = Select(expressions=p[2], table='it')
+    
+    
+def p_sh(p):
+    """
+    sh : SH term FROM ident asinputformat
+       | SH term FROM ident
+    """
+    p[0] = Shell(command=p[2], table=p[4], dialect=clause(p, 'as'))
+
+
+def p_sh_it(p):
+    """
+    sh : SH term asinputformat
+       | SH term
+    """
+    p[0] = Shell(command=p[2], table='it', dialect=clause(p, 'as'))
 
 
 def p_sort(p):
@@ -884,9 +919,9 @@ def p_union_it(p):
 
 def p_write(p):
     """
-    write : WRITE ident to as
+    write : WRITE ident to asoutputformat
           | WRITE ident to
-          | WRITE ident as
+          | WRITE ident asoutputformat
           | WRITE ident
     """
     p[0] = Write(table=p[2], file_or_url=clause(p, 'to'), dialect=clause(p, 'as'))
@@ -894,9 +929,9 @@ def p_write(p):
 
 def p_write_it(p):
     """
-    write : WRITE to as
+    write : WRITE to asoutputformat
           | WRITE to
-          | WRITE as
+          | WRITE asoutputformat
           | WRITE
     """
     p[0] = Write(table='it', file_or_url=clause(p, 'to'), dialect=clause(p, 'as'))
@@ -923,6 +958,7 @@ def p_statement(p):
               | reverse
               | run
               | select
+              | sh
               | sort
               | take
               | transpose
@@ -948,8 +984,8 @@ def p_command_into(p):
 
 def p_command_create(p):
     """
-    command : CREATE ident as block
-            | CREATE ident as string
+    command : CREATE ident asinputformat block
+            | CREATE ident asinputformat string
     """
     p[0] = (p.lineno(1), Create(dialect=p[3], block=p[4]), p[2])
 

@@ -2,6 +2,7 @@ import asyncio
 import click
 import dotenv
 import os
+import pymysql
 import sys
 
 from .console import console
@@ -18,7 +19,7 @@ async def repl(env=None, show_motd=True):
     Read-eval-print loop.
     """
     if show_motd:
-        print(f'Flummox {MAJOR_VERSION}.{MINOR_VERSION} - HELP for help')
+        print(f'Data Jockey {MAJOR_VERSION}.{MINOR_VERSION} - HELP for help')
 
     # create a new scripting context
     script = Script(context=Context(env={**os.environ, **(env or {})}))
@@ -49,6 +50,7 @@ def cli(env_file, args):
 
     if not args:
         asyncio.run(repl(env=env))
+        Workflow().start()
     else:
         script = Script(context=Context(env=env, argv=args))
 
@@ -60,4 +62,7 @@ def cli(env_file, args):
 
 
 if __name__ == '__main__':
+    pymysql.install_as_MySQLdb()    
+
+    # parse command line
     cli()

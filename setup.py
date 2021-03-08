@@ -1,10 +1,10 @@
 from setuptools import setup
 
 setup(
-    name='flummox',
+    name='data-jockey',
     version='0.1',
     packages=[
-        'flummox',
+        'jockey',
     ],
     py_modules=[
         'main',
@@ -22,16 +22,16 @@ setup(
         'sqlalchemy>=1.3',
     ],
     entry_points={
-        'console_scripts': ['flummox=flummox.main:cli'],
+        'console_scripts': ['jockey=jockey.main:cli'],
     },
     author='Jeffrey Massung',
     author_email='massung@gmail.com',
-    description='Flummox Data Query Language',
-    keywords='flummox pandas query sql dataframe script language',
-    url='https://github.com/massung/flummox',
+    description='jockey data query scripting language',
+    keywords='data jockey pandas query sql dataframe script language',
+    url='https://github.com/massung/data-jockey',
     project_urls={
-        'Issues': 'https://github.com/massung/flummox/issues',
-        'Source': 'https://github.com/massung/flummox',
+        'Issues': 'https://github.com/massung/data-jockey/issues',
+        'Source': 'https://github.com/massung/data-jockey',
     },
     license='BSD3',
 )
